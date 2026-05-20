@@ -1,27 +1,53 @@
-tags:
-  - name: Health
-    description: Health check operations
-openapi: 3.0.0
+openapi: 3.1.0
+
 info:
-  title: Access Gate API
+  title: Access Gate Service API
   version: 1.0.0
-  description: OpenAPI specification for the Access Gate mock API.
+  description: Smart campus access gate management API
+
   contact:
-    name: API Support
-    email: support@example.com
+    name: A3 Access Gate Team
+    email: a3@example.com
+
 servers:
-  - url: http://localhost:4010
+  - url: http://127.0.0.1:4010
+    description: Local Prism Mock Server
+
+tags:
+  - name: System
+    description: System operations
+
+  - name: Access
+    description: Access control operations
+
+  - name: Gates
+    description: Gate management operations
+
+  - name: Logs
+    description: Access log operations
+
+  - name: Analytics
+    description: Analytics integration operations
+
+  - name: CoreBusiness
+    description: Core Business integration operations
+
 paths:
+
   /health:
     get:
       tags:
-        - Health
-      summary: Health check endpoint
-      description: Returns the health status of the API.
-      operationId: getHealth
+        - System
+
+      operationId: getHealthStatus
+
+      summary: Health check
+
+      description: Check whether the service is running correctly
+
       responses:
         '200':
-          description: OK
+          description: Service is healthy
           content:
             application/json:
               schema:
@@ -29,13 +55,419 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: ok
+                    example: healthy
     head:
       tags:
-        - Health
+        - System
       summary: Health check endpoint (HEAD)
       description: Health check for HEAD requests.
       operationId: headHealth
       responses:
         '200':
           description: OK
+
+  /access/check:
+    post:
+      tags:
+        - Access
+
+      operationId: checkAccessPermission
+
+      summary: Check access permission
+
+      description: Validate whether a user can enter through a gate
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessRequest'
+
+      responses:
+        '200':
+          description: Access result
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessResponse'
+
+        '403':
+          description: Access denied
+
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+        '500':
+          description: Internal server error
+
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /gates:
+    get:
+      tags:
+        - Gates
+
+      operationId: getAllGates
+
+      summary: Get all gates
+
+      description: Retrieve all available access gates
+
+      responses:
+        '200':
+          description: Gate list
+
+          content:
+            application/json:
+              schema:
+                type: array
+
+                items:
+                  $ref: '#/components/schemas/Gate'
+
+  /logs/recent:
+    get:
+      tags:
+        - Logs
+
+      operationId: getRecentAccessLogs
+
+      summary: Get recent access logs
+
+      description: Retrieve recent access activities
+
+      responses:
+        '200':
+          description: Recent access logs
+
+          content:
+            application/json:
+              schema:
+                type: array
+
+                items:
+                  $ref: '#/components/schemas/AccessLog'
+
+  /analytics/ingest:
+    post:
+      tags:
+        - Analytics
+
+      operationId: sendAccessEventToAnalytics
+
+      summary: Send access event to Analytics
+
+      description: Send access log event to Analytics service for KPI processing
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsAccessEvent'
+
+      responses:
+        '202':
+          description: Event accepted by Analytics
+
+          content:
+            application/json:
+              schema:
+                type: object
+
+                properties:
+                  status:
+                    type: string
+                    example: ACCEPTED
+
+        '400':
+          description: Invalid request
+
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /core/policy-check:
+    post:
+      tags:
+        - CoreBusiness
+
+      operationId: checkRealtimePolicy
+
+      summary: Check realtime access policy
+
+      description: Access Gate requests realtime policy validation from Core Business
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyCheckRequest'
+
+      responses:
+        '200':
+          description: Policy check result
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyCheckResponse'
+
+        '403':
+          description: Policy denied
+
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+
+  schemas:
+
+    AccessRequest:
+      type: object
+
+      description: Request payload for access validation
+
+      required:
+        - cardId
+        - gateId
+        - timestamp
+
+      properties:
+
+        cardId:
+          type: string
+          example: CARD-1001
+
+        gateId:
+          type: string
+          example: GATE-A1
+
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-05-12T10:00:00Z
+
+    AccessResponse:
+      type: object
+
+      description: Result of access validation
+
+      properties:
+
+        allowed:
+          type: boolean
+          example: true
+
+        message:
+          type: string
+          example: Access granted
+
+        accessType:
+          type: string
+
+          enum:
+            - student
+            - staff
+            - guest
+
+          example: student
+
+    Gate:
+      type: object
+
+      description: Access gate information
+
+      properties:
+
+        id:
+          type: string
+          example: GATE-A1
+
+        name:
+          type: string
+          example: Main Entrance
+
+        location:
+          type:
+            - string
+            - "null"
+
+          example: Building A
+
+    AccessLog:
+      oneOf:
+        - $ref: '#/components/schemas/StudentAccessLog'
+        - $ref: '#/components/schemas/StaffAccessLog'
+
+      discriminator:
+        propertyName: type
+
+    StudentAccessLog:
+      type: object
+
+      description: Access log for students
+
+      properties:
+
+        type:
+          type: string
+          const: student
+
+        studentId:
+          type: string
+          example: STU001
+
+        gateId:
+          type: string
+          example: GATE-A1
+
+        time:
+          type: string
+          format: date-time
+          example: 2026-05-12T10:00:00Z
+    StaffAccessLog:
+      type: object
+
+      description: Access log for staff
+
+      properties:
+
+        type:
+          type: string
+          const: staff
+
+        staffId:
+          type: string
+          example: STF001
+
+        gateId:
+          type: string
+          example: GATE-B1
+
+        time:
+          type: string
+          format: date-time
+          example: 2026-05-12T11:00:00Z
+
+    AnalyticsAccessEvent:
+      type: object
+
+      description: Access event sent to Analytics service
+
+      required:
+        - sourceType
+        - eventId
+        - gateId
+        - cardId
+        - direction
+        - decision
+        - occurredAt
+
+      properties:
+
+        sourceType:
+          type: string
+          example: access
+
+        eventId:
+          type: string
+          format: uuid
+
+        gateId:
+          type: string
+          example: GATE-01
+
+        cardId:
+          type: string
+          example: CARD001
+
+        direction:
+          type: string
+
+          enum:
+            - IN
+            - OUT
+
+        decision:
+          type: string
+
+          enum:
+            - ALLOW
+            - DENY
+
+        occurredAt:
+          type: string
+          format: date-time
+
+    PolicyCheckRequest:
+      type: object
+
+      description: Request to Core Business for realtime policy validation
+
+      required:
+        - cardId
+        - gateId
+
+      properties:
+
+        cardId:
+          type: string
+          example: CARD001
+
+        gateId:
+          type: string
+          example: GATE-01
+
+    PolicyCheckResponse:
+      type: object
+
+      description: Policy validation response from Core Business
+
+      properties:
+
+        allowed:
+          type: boolean
+          example: true
+
+        policy:
+          type: string
+          example: NORMAL_ACCESS
+
+    ProblemDetails:
+      type: object
+
+      description: Standard error response object
+
+      properties:
+
+        type:
+          type: string
+          example: about:blank
+
+        title:
+          type: string
+          example: Forbidden
+
+        status:
+          type: integer
+          example: 403
+
+        detail:
+          type: string
+          example: Access denied
+>>>>>>> 0e13a94 (feat: complete lab03 contract testing)
