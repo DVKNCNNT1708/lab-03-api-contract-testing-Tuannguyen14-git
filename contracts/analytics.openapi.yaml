@@ -3,18 +3,55 @@ openapi: 3.1.0
 info:
   title: Analytics Mock API
   version: 1.0.0
+  description: Analytics mock service for consumer-side smoke testing
+
+  contact:
+    name: FIT4110 Team
+    email: fit4110@example.com
 
 servers:
   - url: http://127.0.0.1:4011
 
+tags:
+  - name: Health
+    description: Analytics service health operations
+
 paths:
   /health:
     get:
+      tags:
+        - Health
+
+      operationId: getAnalyticsHealth
+
+      summary: Analytics health check
+
+      description: Check whether Analytics mock service is running
+
       responses:
         '200':
-          description: OK
+          description: Analytics service is healthy
+
+          content:
+            application/json:
+              schema:
+                type: object
+
+                properties:
+                  status:
+                    type: string
+                    example: healthy
 
     head:
+      tags:
+        - Health
+
+      operationId: headAnalyticsHealth
+
+      summary: Analytics HEAD health check
+
+      description: HEAD endpoint for CI health checking
+
       responses:
         '200':
-          description: OK
+          description: Analytics service is healthy
