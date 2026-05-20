@@ -66,6 +66,20 @@ paths:
         '200':
           description: OK
 
+    head:
+      tags:
+        - System
+
+      operationId: headHealthStatus
+
+      summary: Health HEAD check
+
+      description: HEAD endpoint for CI health checking
+
+      responses:
+        '200':
+          description: Service is healthy
+
   /access/check:
     post:
       tags:
