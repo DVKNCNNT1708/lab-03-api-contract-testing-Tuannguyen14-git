@@ -1,48 +1,23 @@
-name: Newman Contract Tests
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-jobs:
-  newman:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Lint OpenAPI contracts
-        run: npm run lint:contracts
-
-      - name: Start Prism mock server
-        run: |
-          nohup npm run mock:gate > prism-gate.log 2>&1 &
-
-      - name: Wait for mock server
-        run: npx wait-on http://127.0.0.1:4010/health --timeout 60000
-
-      - name: Run Newman contract tests
-        run: npm run test:mock
-
-      - name: Show Prism logs on failure
-        if: failure()
-        run: |
-          cat prism-gate.log || true
-
-      - name: Upload Newman reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: newman-reports
-          path: reports/
+openapi: 3.0.0
+info:
+  title: Access Gate API
+  version: 1.0.0
+description: |-
+  OpenAPI specification for the Access Gate mock API.
+servers:
+  - url: http://localhost:4010
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
