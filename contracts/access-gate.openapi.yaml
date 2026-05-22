@@ -2,14 +2,20 @@ openapi: 3.0.0
 info:
   title: Access Gate API
   version: 1.0.0
-description: |-
-  OpenAPI specification for the Access Gate mock API.
+  description: OpenAPI specification for the Access Gate mock API.
+  contact:
+    name: API Support
+    email: support@example.com
 servers:
   - url: http://localhost:4010
 paths:
   /health:
     get:
+      tags:
+        - Health
       summary: Health check endpoint
+      description: Returns the health status of the API.
+      operationId: getHealth
       responses:
         '200':
           description: OK
