@@ -31,15 +31,17 @@ jobs:
           nohup npm run mock:gate > prism-gate.log 2>&1 &
 
       - name: Wait a bit for Prism
-        run: sleep 10
+        run: sleep 20
 
-      - name: Show Prism logs
+      - name: Show Prism logs (pre-wait)
         run: |
           echo "========== PRISM LOG =========="
           cat prism-gate.log || true
 
+
       - name: Wait for mock server
-        run: npx wait-on http://127.0.0.1:4010/health --timeout 60000
+        run: |
+          npx wait-on http://127.0.0.1:4010/health --timeout 60000 || (echo "Prism failed to start, log output:" && cat prism-gate.log && exit 1)
 
       - name: Run Newman contract tests
         run: npm run test:mock
