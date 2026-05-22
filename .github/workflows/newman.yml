@@ -3,6 +3,7 @@ name: Newman Contract Tests
 on:
   push:
     branches: [ "main" ]
+
   pull_request:
     branches: [ "main" ]
 
@@ -28,6 +29,10 @@ jobs:
       - name: Start Prism mock server
         run: |
           nohup npm run mock:gate > prism-gate.log 2>&1 &
+
+      - name: Show Prism logs
+        run: |
+          cat prism-gate.log || true
 
       - name: Wait for mock server
         run: npx wait-on http://localhost:4010/health --timeout 30000
