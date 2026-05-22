@@ -30,3 +30,12 @@ paths:
                   status:
                     type: string
                     example: ok
+    head:
+      tags:
+        - Health
+      summary: Health check endpoint (HEAD)
+      description: Health check for HEAD requests.
+      operationId: headHealth
+      responses:
+        '200':
+          description: OK

@@ -43,7 +43,7 @@ jobs:
 
       - name: Wait for mock server
         run: |
-          npx wait-on http://127.0.0.1:4010/health --timeout 60000 || (echo "Prism failed to start, log output:" && cat prism-gate.log && exit 1)
+          npx wait-on --method GET http://127.0.0.1:4010/health --timeout 60000 || (echo "Prism failed to start, log output:" && cat prism-gate.log && exit 1)
 
       - name: Run Newman contract tests
         run: npm run test:mock
