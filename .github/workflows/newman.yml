@@ -1,3 +1,5 @@
+      - name: Check Prism version
+        run: npx prism --version
 name: Newman Contract Tests
 
 on:
@@ -26,9 +28,9 @@ jobs:
       - name: Lint OpenAPI contracts
         run: npm run lint:contracts
 
-      - name: Start Prism mock server
+      - name: Start Prism mock server (direct)
         run: |
-          nohup npm run mock:gate > prism-gate.log 2>&1 &
+          nohup npx prism mock contracts/access-gate.openapi.yaml -p 4010 --host 0.0.0.0 > prism-gate.log 2>&1 &
 
       - name: Wait a bit for Prism
         run: sleep 20
