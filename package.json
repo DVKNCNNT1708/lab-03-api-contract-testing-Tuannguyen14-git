@@ -8,8 +8,7 @@
 
     "lint:contracts": "spectral lint contracts/*.yaml --fail-severity error",
 
-    "test:mock": "newman run postman/collections/access-gate.postman_collection.json -e postman/environments/access-gate_mock.postman_environment.json --reporters cli,junit,htmlextra --reporter-junit-export reports/newman-report.xml --reporter-htmlextra-export reports/newman-report.html",
-
+    "test:mock": "newman run postman/collections/access-gate.postman_collection.json -e postman/environments/access-gate_mock.postman_environment.json --reporters cli,junit --reporter-junit-export reports/newman-report-mock.xml"
     "test:local": "newman run postman/collections/access-gate.postman_collection.json -e postman/environments/access-gate_mock.postman_environment.json --reporters cli,junit --reporter-junit-export reports/newman-report-local.xml",
 
     "test:html": "newman run postman/collections/access-gate.postman_collection.json -e postman/environments/access-gate_mock.postman_environment.json --reporters cli,htmlextra --reporter-htmlextra-export reports/newman-report.html",
